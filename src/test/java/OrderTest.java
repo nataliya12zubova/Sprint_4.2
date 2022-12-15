@@ -1,5 +1,5 @@
 import model.CheckOrderPlacedPage;
-import model.MainPage;
+import model.MainPageObj;
 import model.OrderPage;
 import org.hamcrest.MatcherAssert;
 import static org.hamcrest.CoreMatchers.is;
@@ -15,8 +15,19 @@ import org.junit.runner.RunWith;
 
 @RunWith(Parameterized.class)
 public class OrderTest {
-        public WebDriver driver;
+        // это переменные со значением, которые надо ввести в поля
+        private final String name = "Наталия";
+        private final String surname = "Зубова";
+        private final String address ="Тверская, 10";
+        private final String subwayStation = "Охотный ряд";
+        private final String phone = "+77777777777";
+        private final String date = "12.12.2022";
+        private final String rentalPeriod = "двое суток";
+        private final String color ="серая безысходность";
+        private final String comment = "оплата наличными";
+        private final String orderSuccess = "Заказ офромлен";
 
+        public WebDriver driver;
         public WebDriver webDriverType;
 
         public OrderTest(WebDriver webDriverValue) {
@@ -42,32 +53,19 @@ public class OrderTest {
                 };
         }
 
-        // это переменные со значением, которые надо ввести в поля
-        private final String name = "Наталия";
-        private final String surname = "Зубова";
-        private final String address ="Тверская, 10";
-        private final String subwayStation = "Охотный ряд";
-        private final String phone = "+77777777777";
-        private final String date = "12.12.2022";
-        private final String rentalPeriod = "двое суток";
-        private final String color ="серая безысходность";
-        private final String comment = "оплата наличными";
-        private final String orderSuccess = "Заказ офромлен";
-
         @Test
         public void makeOrder() {
                 // перешли на страницу тестового приложения
                 driver = webDriverType;
-                //driver = new FireFoxDriver(options);
                 driver.get("https://qa-scooter.praktikum-services.ru/");
 
                 OrderPage orderPage = new OrderPage(driver);
 
                 // создали объект класса Главной страницы
-                MainPage mainPage = new MainPage(driver);
+                MainPageObj mainPageObj = new MainPageObj(driver);
 
                 // кликнули на кнопку "Заказать" на Главной странице
-                mainPage.clickOrderButtonUpper();
+                mainPageObj.clickOrderButtonUpper();
                 //ожидание загрузки страницы заказа
                 orderPage.waitForLoadAnswer();
                 // заполнение атрибутов заказа (стр. 1)

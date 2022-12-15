@@ -1,4 +1,4 @@
-import model.MainPage;
+import model.MainPageObj;
 import org.junit.runners.Parameterized;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -66,13 +66,13 @@ public class QuestionsTest {
         driver.get("https://qa-scooter.praktikum-services.ru/");
 
         // создали объект класса Главной страницы
-        MainPage mainPage = new MainPage(driver);
+        MainPageObj mainPageObj = new MainPageObj(driver);
         // кликнули на строку на Главной странице
-        mainPage.clickQuestion(elementId);
+        mainPageObj.clickQuestion(elementId);
         // подождали пока загрузится контент
-        mainPage.waitForLoadAnswer(elementId);
+        mainPageObj.waitForLoadAnswer(elementId);
         // проверли, что текст ответа соответсвует тексту вопроса
-        mainPage.checkText(questionText, answerText, elementId);
+        mainPageObj.checkText(questionText, answerText, elementId);
     }
     @After
     public void tearDown() {
