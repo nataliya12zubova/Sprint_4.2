@@ -19,11 +19,11 @@ public class CheckOrderPlacedPage {
     // метод для получения текста элемента
     public void waitForLoadHeader(){
         new WebDriverWait(driver, Duration.ofSeconds(2))
-                .until(ExpectedConditions.visibilityOfElementLocated(By.className("Order_ModalHeader__3FDaJ")));
+                .until(ExpectedConditions.visibilityOfElementLocated(headerUser));
     }
 
     // метод для получения текста элемента
     public String orderPlaced () {
-        return driver.findElement(By.className("Order_ModalHeader__3FDaJ")).getText();
+        return driver.findElement(headerUser).getText();
     }
 }

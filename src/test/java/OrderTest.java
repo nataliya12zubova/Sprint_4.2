@@ -28,35 +28,36 @@ public class OrderTest {
         private final String orderSuccess = "Заказ офромлен";
 
         public WebDriver driver;
-        public WebDriver webDriverType;
+        public String webDriverType;
 
-        public OrderTest(WebDriver webDriverValue) {
+        public OrderTest(String webDriverValue) {
                 this.webDriverType = webDriverValue;
         }
 
         @Parameterized.Parameters
         public static Object[] getData() {
-                // создали драйвер для браузера Chrome
-                ChromeOptions chromeOptions = new ChromeOptions();
-                chromeOptions.addArguments("--no-sandbox", "--headless", "--disable-dev-shm-usage");
-                // перешли на страницу тестового приложения
-                WebDriver chromeDriver = new ChromeDriver(chromeOptions);
-
-                // создали драйвер для браузера Firefox
-                FirefoxOptions ffOptions = new FirefoxOptions();
-                ffOptions.addArguments("--no-sandbox", "--headless", "--disable-dev-shm-usage");
-                WebDriver firefoxDriver = new FirefoxDriver(ffOptions);
-
                 return new Object[] {
-                        chromeDriver,
-                        firefoxDriver,
+                        "chrome",
+                        "firefoxDriver",
                 };
         }
 
         @Test
         public void makeOrder() {
-                // перешли на страницу тестового приложения
-                driver = webDriverType;
+                // создали драйвер для браузера Chrome
+                if (webDriverType == "chrome") {
+                        ChromeOptions chromeOptions = new ChromeOptions();
+                        // перешли на страницу тестового приложения
+                        driver = new ChromeDriver(chromeOptions);
+                }
+                // создали драйвер для браузера Firefox
+                else {
+                        FirefoxOptions ffOptions = new FirefoxOptions();
+                        // перешли на страницу тестового приложения
+                        driver = new FirefoxDriver(ffOptions);
+                }
+
+                // переход на страницу тестового приложения
                 driver.get("https://qa-scooter.praktikum-services.ru/");
 
                 OrderPage orderPage = new OrderPage(driver);
@@ -98,6 +99,14 @@ public class OrderTest {
                 String OrderPlacedText = checkOrderPlacedPage.orderPlaced();
                 // сделай проверку, что полученное значение совпадает с текстом "Заказ офромлен"
                 MatcherAssert.assertThat(OrderPlacedText, is(orderSuccess));
+
+                // переход на страницу тестового приложения
+                driver.get("https://qa-scooter.praktikum-services.ru/");
+
+                // кликнули на кнопку "Заказать" на Главной странице
+                mainPageObj.clickOrderButtonMiddle();
+                //ожидание загрузки страницы заказа
+                orderPage.waitForLoadAnswer();
         }
         @After
         public void tearDown() {
