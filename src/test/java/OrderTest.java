@@ -1,113 +1,108 @@
-import model.CheckOrderPlacedPage;
 import model.MainPageObj;
 import model.OrderPage;
-import org.hamcrest.MatcherAssert;
-import static org.hamcrest.CoreMatchers.is;
-import org.junit.runners.Parameterized;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.chrome.ChromeOptions;
+import model.TestFixtures;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class OrderTest {
+public class OrderTest extends TestFixtures {
+        private MainPageObj mainPageObj = new MainPageObj(driver);
+        private OrderPage orderPage = new OrderPage(driver);
         // это переменные со значением, которые надо ввести в поля
-        private final String name = "Наталия";
-        private final String surname = "Зубова";
-        private final String address ="Тверская, 10";
-        private final String subwayStation = "Охотный ряд";
-        private final String phone = "+77777777777";
-        private final String date = "12.12.2022";
-        private final String rentalPeriod = "двое суток";
-        private final String color ="серая безысходность";
-        private final String comment = "оплата наличными";
-        private final String orderSuccess = "Заказ офромлен";
+        private String name;
+        private String surname;
+        private String address;
+        private String subwayStation;
+        private String phone;
+        private String date;
+        private String rentalPeriod;
+        private String color;
+        private String comment;
+        private boolean isDisplayed;;
 
-        public WebDriver driver;
-        public String webDriverType;
-
-        public OrderTest(String webDriverValue) {
-                this.webDriverType = webDriverValue;
+        public OrderTest(String name, String surname, String address, String subwayStation, String phone,
+                String date, String rentalPeriod, String color, String comment, boolean isDisplayed) {
+                this.name = name;
+                this.surname = surname;
+                this.address = address;
+                this.subwayStation = subwayStation;
+                this.phone = phone;
+                this.date = date;
+                this.rentalPeriod = rentalPeriod;
+                this.color = color;
+                this.comment = comment;
+                this.isDisplayed = isDisplayed;
         }
 
-        @Parameterized.Parameters
-        public static Object[] getData() {
-                return new Object[] {
-                        "chrome",
-                        "firefoxDriver",
+        @Parameterized.Parameters(name = "CHROME. Форма заказа заполнена корректно для {0} {1}. Заказ оформлен? {9}")
+        public static Object[][] getData() {
+                return new Object[][] {
+                        { "Наталия", "Зубова", "Тверская,10", "Охотный ряд", "+77777777777", "12.12.2022", "двое суток", "серая безысходность", "оплата наличными", true}
                 };
         }
 
         @Test
-        public void makeOrder() {
-                // создали драйвер для браузера Chrome
-                if (webDriverType == "chrome") {
-                        ChromeOptions chromeOptions = new ChromeOptions();
-                        // перешли на страницу тестового приложения
-                        driver = new ChromeDriver(chromeOptions);
-                }
-                // создали драйвер для браузера Firefox
-                else {
-                        FirefoxOptions ffOptions = new FirefoxOptions();
-                        // перешли на страницу тестового приложения
-                        driver = new FirefoxDriver(ffOptions);
-                }
-
-                // переход на страницу тестового приложения
-                driver.get("https://qa-scooter.praktikum-services.ru/");
-
-                OrderPage orderPage = new OrderPage(driver);
-
-                // создали объект класса Главной страницы
-                MainPageObj mainPageObj = new MainPageObj(driver);
-
-                // кликнули на кнопку "Заказать" на Главной странице
+        public void makeOrderButtonUpper() {
+                // кликнули на верхнюю кнопку "Заказать" на Главной странице
                 mainPageObj.clickOrderButtonUpper();
                 //ожидание загрузки страницы заказа
-                orderPage.waitForLoadAnswer();
+                orderPage.waitForLoadPage();
                 // заполнение атрибутов заказа (стр. 1)
-                orderPage.setUserName(name);
-                orderPage.setSurname(surname);
-                orderPage.setAddress(address);
-                orderPage.setSubwayStationField(subwayStation);
-                orderPage.setPhoneField(phone);
-
+                orderPage.completeOrderForm1(
+                        name,
+                        surname,
+                        address,
+                        subwayStation,
+                        phone);
                 // кликнули на кнопку "Далее"
                 orderPage.clickNextBtn();
-
                 // заполнение атрибутов заказа (стр. 2)
-                orderPage.setDateField(date);
-                orderPage.setRentalPeriodField(rentalPeriod);
-                orderPage.setColorField(color);
-                orderPage.setCommentField(comment);
-
-                // кликнули на кнопку "Заказать"
-                orderPage.clickInvertedBtn();
-
-                // кликнули на кнопку "Да"
+                orderPage.completeOrderForm2(
+                        date,
+                        rentalPeriod,
+                        color,
+                        comment);
                 orderPage.clickOrderedBtn();
+                orderPage.waitForOrderConfirmationModal();
+                orderPage.clickInvertedBtn();
+                orderPage.waitForSuccessOrderModal();
+                orderPage.waitForSuccessOrderModal();
+                Assert.assertTrue("Модальное окно \"Заказ оформлен\" не отображается",driver.findElement(orderPage.getSuccessOrderModal()).isDisplayed()==isDisplayed);
 
-                // создай объект класса модального окна "Заказ оформлен"
-                CheckOrderPlacedPage checkOrderPlacedPage = new CheckOrderPlacedPage(driver);
-                // дождись загрузки заголовка
-                checkOrderPlacedPage.waitForLoadHeader();
-                // получи текст элемента в заголовке
-                String OrderPlacedText = checkOrderPlacedPage.orderPlaced();
-                // сделай проверку, что полученное значение совпадает с текстом "Заказ офромлен"
-                MatcherAssert.assertThat(OrderPlacedText, is(orderSuccess));
-
-                // переход на страницу тестового приложения
-                driver.get("https://qa-scooter.praktikum-services.ru/");
-
-                // кликнули на кнопку "Заказать" на Главной странице
+        }
+        @Test
+        public void makeOrderButtonMiddle() {
+                // кликнули на среднюю кнопку "Заказать" на Главной странице
                 mainPageObj.clickOrderButtonMiddle();
                 //ожидание загрузки страницы заказа
-                orderPage.waitForLoadAnswer();
-        }
+                orderPage.waitForLoadPage();
+                // заполнение атрибутов заказа (стр. 1)
+                orderPage.completeOrderForm1(
+                        name,
+                        surname,
+                        address,
+                        subwayStation,
+                        phone);
+                // кликнули на кнопку "Далее"
+                orderPage.clickNextBtn();
+                // заполнение атрибутов заказа (стр. 2)
+                orderPage.completeOrderForm2(
+                        date,
+                        rentalPeriod,
+                        color,
+                        comment);
+                orderPage.clickOrderedBtn();
+                orderPage.waitForOrderConfirmationModal();
+                orderPage.clickInvertedBtn();
+                orderPage.waitForSuccessOrderModal();
+                orderPage.waitForSuccessOrderModal();
+                Assert.assertTrue("Модальное окно \"Заказ оформлен\" не отображается",driver.findElement(orderPage.getSuccessOrderModal()).isDisplayed()==isDisplayed);
+
+
+                }
         @After
         public void tearDown() {
         // закрыли браузер
